@@ -1718,6 +1718,78 @@ unset _KERL_CLEANUP
 =======
 }
 
+emit_activate_nushell() {
+    release=$1
+    build_name=$2
+    directory=$3
+
+    cat << \
+        =======
+module warning {
+    export-env {
+        const file = path self
+        error make -u {
+            msg: \$"\`(\$file | path basename)\` is meant to be used with \`overlay use\`, not \`source\`"
+        }
+    }
+
+}
+
+use warning
+
+export-env {
+    let kerl = which kerl | get path | first
+
+    let kerl_version = if (\$kerl | is-not-empty) { ^\$kerl version }
+    if (\$kerl_version | is-not-empty) and (\$kerl_version != "$KERL_VERSION") {
+        print "WARNING: this Erlang/OTP installation appears to be stale. Please consider reinstalling."
+        print \$"        It was created with kerl $KERL_VERSION, and the current version is (\$kerl_version)."
+    }
+
+    let new_path = \$env.PATH | prepend "$directory/bin"
+    let new_path = \$new_path | prepend (glob "$directory/**/*erl_interface*/bin" | first)
+
+    let new_manpath = \$env | upsert MANPATH {|ctx|
+        if (\$ctx.MANPATH? | is-empty) {
+            "$directory/lib/erlang/man:$directory/man"
+        } else {
+            \$"$directory/lib/erlang/man:$directory/man:(\$ctx.MANPATH)"
+        }
+    }
+
+    let rebar_plt_dir = "$directory"
+    let rebar_cache_dir = "$directory/.cache/rebar3"
+
+    let erl_aflags = \$env.ERL_AFLAGS? | default ""
+    let erl_aflags = if not (\$erl_aflags | str contains "kernel shell_history") {
+        $"-kernel shell_history enabled (\$erl_aflags)" | str trim
+    } else { \$erl_aflags }
+
+    if ("$KERL_CONFIG.nu" | path exists) {
+        source-env $KERL_CONFIG.nu
+    }
+    let kerl_prompt_format = \$env.KERL_PROMPT_FORMAT? | default "(%BUILDNAME%)" | str replace "%RELEASE%" "$release" | str replace "%BUILDNAME%" "$build_name"
+    let old_prompt_command = \$env.PROMPT_COMMAND? | default ""
+    let new_prompt_command = if ("PROMPT_COMMAND" in \$env) {
+        if (\$old_prompt_command | describe | \$in == "closure") {
+            {|| $"(\$kerl_prompt_format) (do \$old_prompt_command)" }
+        } else {
+            {|| $"(\$kerl_prompt_format) (\$old_prompt_command)" }
+        }
+    } else {
+        {|| \$"(\$kerl_prompt_format)" }
+    }
+
+
+    let new_env = { PATH: \$new_path MANPATH: \$new_manpath REBAR_PLT_DIR: \$rebar_plt_dir REBAR_CACHE_DIR: \$rebar_cache_dir ERL_AFLAGS: \$erl_aflags PROMPT_COMMAND: \$new_prompt_command }
+
+    load-env \$new_env
+}
+
+export alias kerl_deactivate = overlay hide activate
+=======
+}
+
 do_install() {
     build_name=$1
 
@@ -1789,6 +1861,7 @@ do_install() {
     emit_activate "$rel" "$build_name" "$absdir" >"$absdir"/activate
     emit_activate_fish "$rel" "$build_name" "$absdir" >"$absdir"/activate.fish
     emit_activate_csh "$rel" "$build_name" "$absdir" >"$absdir"/activate.csh
+    emit_activate_nushell "$rel" "$build_name" "$absdir" >"$absdir"/activate.nu
 
     if [ -n "$KERL_BUILD_DOCS" ]; then
         if ! cd "$ERL_TOP"; then

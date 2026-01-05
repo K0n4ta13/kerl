@@ -198,7 +198,7 @@ case "${words[1]}" in
             _kerl_otp_installations_names
             _wanted installations expl 'all installations' compadd -a installations
         elif [[ "$state" == "shell" ]]; then
-          shells=('sh' 'bash' 'fish' 'csh')
+          shells=('sh' 'bash' 'fish' 'csh' 'nushell')
           _wanted shells expl 'supported shells' compadd -a shells
         fi
         ;;

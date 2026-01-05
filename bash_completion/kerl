@@ -123,7 +123,7 @@ _kerl() {
                 COMPREPLY=($(compgen -W "$installations" -- "$cur"))
             fi
         elif [ "$COMP_CWORD" -eq 5 ]; then
-            COMPREPLY=($(compgen -W "sh bash fish csh" -- "$cur"))
+            COMPREPLY=($(compgen -W "sh bash fish csh nushell" -- "$cur"))
         fi
         ;;
     *) ;;

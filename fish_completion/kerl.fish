@@ -85,7 +85,7 @@ function kerl_emit_activate_complete
         case 4
             kerl_otp_installations_names
         case 5
-            printf "%s\n%s\n%s\n%s" sh bash fish csh
+            printf "%s\n%s\n%s\n%s\n%s" sh bash fish csh nushell
     end
 end
 

@@ -1763,12 +1763,12 @@ export-env {
 
     let erl_aflags = \$env.ERL_AFLAGS? | default ""
     let erl_aflags = if not (\$erl_aflags | str contains "kernel shell_history") {
-        $"-kernel shell_history enabled (\$erl_aflags)" | str trim
+        \$"-kernel shell_history enabled (\$erl_aflags)" | str trim
     } else { \$erl_aflags }
 
     let kerlrc_path = "$KERL_CONFIG"
-    if ($kerlrc_path | path exists) {
-        open $kerlrc_path
+    if (\$kerlrc_path | path exists) {
+        open \$kerlrc_path
           | lines
           | parse "export {key}={value}"
           | update value { str trim -c '"' }

@@ -6,7 +6,7 @@ module completions {
     ]
 
     def "nu-complete kerl get-releases" [] {
-        let otp_releases = ($env.KERL_BASE_DIR? | default $env.HOME | path join ".kerl/otp_releases")
+        let otp_releases = ($env.KERL_BASE_DIR? | default ($env.HOME | path join ".kerl") | path join "otp_releases")
 
         if ($otp_releases | path exists) {
             return (open $otp_releases | lines)
@@ -27,7 +27,7 @@ module completions {
     ]
 
     def "nu-complete kerl get-builds" [] {
-        let otp_builds = ($env.KERL_BASE_DIR? | default $env.HOME | path join ".kerl/otp_builds")
+        let otp_builds = ($env.KERL_BASE_DIR? | default ($env.HOME | path join ".kerl") | path join "otp_builds")
 
         if ($otp_builds | path exists) {
             return (open $otp_builds | lines | split column "," release build_name | get build_name)
@@ -57,7 +57,7 @@ module completions {
     ]
 
     def "nu-complete kerl get-installations" [] {
-        let otp_installations = ($env.KERL_BASE_DIR? | default $env.HOME | path join ".kerl/otp_installations")
+        let otp_installations = ($env.KERL_BASE_DIR? | default ($env.HOME | path join ".kerl") | path join "otp_installations")
 
         if ($otp_installations | path exists) {
             return (open $otp_installations | lines | split column " " build_name installation | get installation)

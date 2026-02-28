@@ -923,7 +923,7 @@ $ kerl_deactivate
 
 ### nushell
 
-`kerl` has basic support for the nushell shell.
+`kerl` has basic support for Nushell.
 
 To activate an installation:
 
